@@ -5,6 +5,24 @@ Maintains full multi-turn context, recognises user intent, extracts entities, an
 
 ---
 
+## Demo
+
+### Welcome Screen
+![Welcome Screen](demo1_welcome.png)
+
+### Order Tracking — Multi-Turn Conversation
+![Order Tracking](demo2_order.png)
+
+### Context Memory in Action
+![Context Memory](demo3_context.png)
+> Notice the context bar at the bottom — the agent remembered `ORD-56789` from turn 2 and never asked again when the user said "cancel it" in turn 5.
+
+### Complaint Detection + Escalation
+![Complaint Handling](demo4_complaint.png)
+> When frustration is detected, Aria empathises first before solving — and handles escalation to a human agent seamlessly.
+
+---
+
 ## What Makes This Different
 
 Most chatbot demos just pipe messages to an LLM and call it done.  
@@ -32,6 +50,10 @@ aria-chatbot/
 │   └── ai_service.py         # Claude / OpenAI API wrapper
 ├── static/
 │   └── index.html            # Chat UI (single file, no build step)
+├── demo1_welcome.png         # Screenshot — welcome screen
+├── demo2_order.png           # Screenshot — order tracking flow
+├── demo3_context.png         # Screenshot — context memory
+├── demo4_complaint.png       # Screenshot — complaint + escalation
 ├── requirements.txt
 ├── .env.example
 ├── Procfile                  # For Railway / Render deployment
@@ -44,7 +66,7 @@ aria-chatbot/
 
 ```bash
 # 1. Clone
-git clone https://github.com/YOUR_USERNAME/aria-chatbot.git
+git clone https://github.com/M-K-Chaitanya/Context-Aware-Conversational-Chatbot.git
 cd aria-chatbot
 
 # 2. Create virtual environment
@@ -80,7 +102,6 @@ uvicorn main:app --reload --port 8000
 ## API Reference
 
 ### POST /chat
-Send a message and receive a reply with context metadata.
 
 **Request:**
 ```json
@@ -109,13 +130,8 @@ Send a message and receive a reply with context metadata.
 ```
 
 ### GET /session/{session_id}/history
-Returns full conversation history and context for a session.
-
 ### DELETE /session/{session_id}
-Clears a session and all its context.
-
 ### GET /health
-Health check endpoint.
 
 ---
 
@@ -127,7 +143,6 @@ Turn 1:  User: "Hi, I'm having an issue with my order"
 
 Turn 2:  User: "It's ORD-78291"
          → Entity extracted: order_id = ORD-78291
-         → Context inherits order_status intent
 
 Turn 3:  User: "I want to return it"
          → Intent: order_return
@@ -136,8 +151,6 @@ Turn 3:  User: "I want to return it"
 Turn 4:  User: "yes"
          → Short message → contextual inheritance → return confirmed
 ```
-
-The `ContextManager` maintains this across ALL turns without the LLM needing to re-read the full raw history every time. Older turns beyond 20 are condensed into a compact summary.
 
 ---
 
@@ -160,42 +173,11 @@ The `ContextManager` maintains this across ALL turns without the LLM needing to 
 ## Deploy to Railway (Free)
 
 ```bash
-# 1. Install Railway CLI
 npm install -g @railway/cli
-
-# 2. Login and deploy
 railway login
 railway init
 railway up
-
-# 3. Set environment variables in Railway dashboard
-# AI_PROVIDER=anthropic
-# ANTHROPIC_API_KEY=your-key
-```
-
-Or deploy to **Render** — connect your GitHub repo, set env vars, done.
-
----
-
-## Sample Conversations
-
-**Order Tracking:**
-```
-User:  Where is my order?
-Aria:  I'd be happy to help track your order! Could you share your order ID?
-User:  ORD-56789
-Aria:  Got it! Let me check ORD-56789 for you right away...
-User:  Actually I want to cancel it
-Aria:  I can help you cancel ORD-56789. Are you sure you'd like to proceed?
-```
-*(Notice Aria remembers ORD-56789 and doesn't ask again)*
-
-**Frustrated Customer:**
-```
-User:  This is absolutely terrible. My package has been lost for 2 weeks.
-Aria:  I'm really sorry to hear that — a 2-week delay is completely unacceptable
-       and I completely understand your frustration. Let me prioritise this
-       for you right now. Could you share your order number?
+# Set AI_PROVIDER + ANTHROPIC_API_KEY in Railway dashboard
 ```
 
 ---
